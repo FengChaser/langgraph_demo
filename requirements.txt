@@ -1,0 +1,6 @@
+langgraph==0.4.8
+langchain-core
+langchain-deepseek
+python-dotenv
+httpx
+typing-extensions
