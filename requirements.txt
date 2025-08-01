@@ -4,3 +4,5 @@ langchain-deepseek
 python-dotenv
 httpx
 typing-extensions
+requests
+pydantic
