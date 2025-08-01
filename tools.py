@@ -351,10 +351,53 @@ def convert_units(value: float, from_unit: str, to_unit: str, category: str) -> 
                 result = value - 273.15
                 return f"转换结果: {value}K = {result:.2f}°C"
         
-        return "不支持的单位转换"
+        return f"不支持的转换: {from_unit} -> {to_unit} ({category})"
     
     except Exception as e:
         return f"转换错误: {str(e)}"
+
+
+# ================================
+# 7. 网络搜索工具 (SerpAPI)
+# ================================
+
+class SearchInput(BaseModel):
+    """搜索输入参数"""
+    query: str = Field(description="搜索关键词或问题")
+    num_results: int = Field(default=5, description="返回结果数量，默认5个")
+
+@tool("web_search", args_schema=SearchInput)
+def search_web(query: str, num_results: int = 5) -> str:
+    """
+    使用 SerpAPI 搜索互联网信息
+    
+    Args:
+        query: 搜索关键词
+        num_results: 返回结果数量
+    
+    Returns:
+        搜索结果摘要
+    """
+    try:
+        # 导入 SerpAPI
+        from langchain_community.utilities import SerpAPIWrapper
+        
+        # 初始化 SerpAPI
+        search = SerpAPIWrapper()
+        
+        # 执行搜索
+        results = search.run(query)
+        
+        # 格式化结果
+        if results:
+            return f"🔍 搜索关键词: {query}\n\n📊 搜索结果:\n{results}"
+        else:
+            return f"未找到关于 '{query}' 的相关信息"
+            
+    except ImportError:
+        return "❌ 错误: 请安装 langchain-community 包: pip install langchain-community"
+    except Exception as e:
+        return f"❌ 搜索失败: {str(e)}\n💡 请确保已设置 SERPAPI_API_KEY 环境变量"
 
 
 # ================================
@@ -368,7 +411,8 @@ AVAILABLE_TOOLS = [
     get_datetime_info,
     process_text,
     generate_random,
-    convert_units
+    convert_units,
+    search_web  # 添加搜索工具
 ]
 
 def get_all_tools():
@@ -424,3 +468,8 @@ if __name__ == "__main__":
     print("6. 单位转换测试:")
     print(convert_units.invoke({"value": 100, "from_unit": "cm", "to_unit": "m", "category": "length"}))
     print(convert_units.invoke({"value": 32, "from_unit": "F", "to_unit": "C", "category": "temperature"}))
+    print()
+    
+    # 测试网络搜索
+    print("7. 网络搜索测试:")
+    print(search_web.invoke({"query": "Python编程", "num_results": 3}))
